@@ -1,3 +1,14 @@
+terraform {
+  backend "s3" {
+    bucket = "terraform-state-skinnybeans"
+    key = "stage/services/webserver-cluster/terraform.tfstate"
+    region = "ap-southeast-2"
+
+    dynamodb_table = "terraform-locks-skinnybeans"
+    encrypt = true
+  }
+}
+
 provider "aws" {
   region = "ap-southeast-2"
 }
