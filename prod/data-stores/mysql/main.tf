@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "terraform-state-skinnybeans"
-    key = "stage/data-stores/mysql/terraform.tfstate"
+    key = "prod/data-stores/mysql/terraform.tfstate"
     region = "ap-southeast-2"
 
     dynamodb_table = "terraform-locks-skinnybeans"
@@ -15,8 +15,8 @@ provider "aws" {
 
 module "database" {
   source = "../../../modules/data-stores/mysql"
-  db_admin_password_parameter = "/stage/data-stores/mysql/admin-password"
-  db_cluster_identifier = "stage-mysql"
+  db_admin_password_parameter = "/prod/data-stores/mysql/admin-password"
+  db_cluster_identifier = "prod-mysql"
 }
 
 output "address" {
