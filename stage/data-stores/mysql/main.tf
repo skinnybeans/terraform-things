@@ -25,4 +25,7 @@ resource "aws_db_instance" "mysql" {
     name                = "example_database"
     username            = "admin"
     password            = data.aws_ssm_parameter.db_password.value
+    skip_final_snapshot = true
+    backup_retention_period = 0
+    apply_immediately   = true
 }
