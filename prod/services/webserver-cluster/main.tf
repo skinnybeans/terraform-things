@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "terraform-state-skinnybeans"
-    key = "stage/services/webserver-cluster/terraform.tfstate"
+    key = "prod/services/webserver-cluster/terraform.tfstate"
     region = "ap-southeast-2"
 
     dynamodb_table = "terraform-locks-skinnybeans"
@@ -16,7 +16,7 @@ provider "aws" {
 module "webserver_cluster" {
   source = "../../../modules/services/webserver-cluster"
 
-  cluster_name = "webservers-stage"
+  cluster_name = "webservers-prod"
   db_remote_state_bucket = "terraform-state-skinnybeans"
-  db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
+  db_remote_state_key = "prod/data-stores/mysql/terraform.tfstate"
 }
