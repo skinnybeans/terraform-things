@@ -18,7 +18,7 @@ data "terraform_remote_state" "db" {
 resource "aws_launch_configuration" "web_server" {
   name            = "${var.cluster_name}-launch-config"
   image_id        =    "ami-0567f647e75c7bc05"
-  instance_type   = "t2.micro"
+  instance_type   = var.instance_type
   security_groups = [ aws_security_group.web_http.id ]
 
   user_data       = templatefile("user-data.sh", 
@@ -48,8 +48,8 @@ resource "aws_autoscaling_group" "web_asg" {
   target_group_arns = [aws_lb_target_group.web_target.arn]
   health_check_type = "ELB"
 
-  min_size = 2
-  max_size = 10
+  min_size = var.min_size
+  max_size = var.max_size
   tag {
     key = "Name"
     value = "${var.cluster_name}"
