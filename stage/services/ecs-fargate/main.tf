@@ -23,6 +23,16 @@ data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
+// TODO: change certificate ARN look up
+data "terraform_remote_state" "cert_arn" {
+  backend = "s3"
+  config = {
+    bucket = "terraform-state-skinnybeans"
+    key    = "stage/shared/certificates/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}
+
 ##
 ## Security groups
 ##
@@ -50,11 +60,10 @@ resource "aws_security_group" "web_task" {
 resource "aws_security_group" "web_lb" {
   name    = "public-lb-sg"
 
-  # TODO: change to 443
   ingress {
-    description   = "HTTP traffic from public"
-    from_port     = 80
-    to_port       = 80
+    description   = "HTTPS traffic from public"
+    from_port     = 443
+    to_port       = 443
     protocol      = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
@@ -213,34 +222,32 @@ resource "aws_alb_listener" "http" {
   port              = 80
   protocol          = "HTTP"
 
+  # default_action {
+  #   target_group_arn = aws_alb_target_group.main.id
+  #   type             = "forward"
+  # }
+
+  default_action {
+   type = "redirect"
+ 
+   redirect {
+     port        = 443
+     protocol    = "HTTPS"
+     status_code = "HTTP_301"
+   }
+  }
+}
+
+resource "aws_alb_listener" "https" {
+  load_balancer_arn = aws_lb.main.id
+  port              = 443
+  protocol          = "HTTPS"
+ 
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = data.terraform_remote_state.cert_arn.outputs.sorcerer_cert_arn
+ 
   default_action {
     target_group_arn = aws_alb_target_group.main.id
     type             = "forward"
   }
-
-  # TODO: re-enable redirect
-  # default_action {
-  #  type = "redirect"
- 
-  #  redirect {
-  #    port        = 443
-  #    protocol    = "HTTPS"
-  #    status_code = "HTTP_301"
-  #  }
-  # }
 }
-
-# TODO: re-enable HTTPS listener
-# resource "aws_alb_listener" "https" {
-#   load_balancer_arn = aws_lb.main.id
-#   port              = 443
-#   protocol          = "HTTPS"
- 
-#   ssl_policy        = "ELBSecurityPolicy-2016-08"
-#   certificate_arn   = var.alb_tls_cert_arn
- 
-#   default_action {
-#     target_group_arn = aws_alb_target_group.main.id
-#     type             = "forward"
-#   }
-# }
