@@ -44,9 +44,7 @@ resource "aws_security_group" "web_task" {
     from_port     = 80
     to_port       = 80
     protocol      = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    #TODO: change back to self when LB is working
-    //self          = true
+    self          = true
   }
 
   egress {
@@ -193,7 +191,7 @@ resource "aws_lb" "main" {
   name               = "${var.name}-alb-${var.environment}"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.web_lb.id]
+  security_groups    = [aws_security_group.web_lb.id, aws_security_group.web_task.id]
   subnets            = data.aws_subnet_ids.default.ids
  
   enable_deletion_protection = false
