@@ -82,6 +82,21 @@ resource "aws_ecs_cluster" "main" {
 }
 
 ##
+## Cloudwatch log group for task
+##
+resource "aws_cloudwatch_log_group" "task_logs" {
+  name = "stage/services/ecs-fargate"
+
+  retention_in_days = 1
+
+  tags = {
+    Environment = "stage"
+    Application = "ecs-fargate"
+  }
+}
+
+
+##
 ## Task and service set up
 ##
 resource "aws_ecs_task_definition" "main" {
@@ -103,6 +118,14 @@ resource "aws_ecs_task_definition" "main" {
         containerPort = var.container_port
         hostPort      = var.container_port
       }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = "stage/services/ecs-fargate"
+          awslogs-stream-prefix = "nginx"
+          awslogs-region        = "ap-southeast-2"
+        }
+      }
     }
   ])
 }
@@ -129,6 +152,7 @@ EOF
 }
 
 // Task execution role to allow fargate to pull and start images
+# TODO: add logs:CreateLogGroup permission so can create cloudwatch log group
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.name}-ecsTaskExecutionRole"
  
@@ -255,8 +279,8 @@ resource "aws_alb_listener" "https" {
 ##
 
 resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = 2
-  min_capacity       = 1
+  max_capacity       = 4
+  min_capacity       = 2
   resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
