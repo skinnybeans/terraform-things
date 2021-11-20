@@ -92,7 +92,7 @@ resource "aws_cloudwatch_log_group" "task_logs" {
 ## Task and service set up
 ##
 resource "aws_ecs_task_definition" "main" {
-  family                    = "service"
+  family                    = "${var.gen_environment}-${var.task_name}-task"
   network_mode              = "awsvpc"
   requires_compatibilities  = ["FARGATE"]
   cpu                       = var.task_cpu
@@ -101,7 +101,7 @@ resource "aws_ecs_task_definition" "main" {
   task_role_arn             = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([
     {
-      name            = "${var.gen_environment}-${var.task_name}-task"
+      name            = "${var.gen_environment}-${var.task_name}-container"
       image           = "${var.task_container_image}:${var.task_container_image_tag}"
       essential       = true
       #environment     = var.task_container_environment
@@ -204,7 +204,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_alb_target_group.main.arn
-    container_name   = "${var.gen_environment}-${var.task_name}-task"
+    container_name   = "${var.gen_environment}-${var.task_name}-container"
     container_port   = var.task_container_port
   }
 
