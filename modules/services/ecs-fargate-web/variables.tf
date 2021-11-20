@@ -15,17 +15,17 @@ variable "gen_environment" {
 ##
 ##  Networking
 ##
-variable "vpc_id" {
+variable "net_vpc_id" {
   description = "VPC to deploy cluster to"
   type        = string
 }
 
-variable "load_balancer_subnet_ids" {
+variable "net_load_balancer_subnet_ids" {
   description = "Subnets to deploy load balancer into"
   type        = list
 }
 
-variable "task_subnet_ids" {
+variable "net_task_subnet_ids" {
   description = "Subnets to deploy task into"
   type        = list
 }
@@ -33,7 +33,7 @@ variable "task_subnet_ids" {
 ##
 ##  SSL cert
 ##
-variable "load_balancer_certificate_arn" {
+variable "ssl_load_balancer_certificate_arn" {
   description = "SSL certificate ARN to use on loadbalancer"
   type        = string
 }
@@ -67,38 +67,33 @@ variable "task_memory" {
   default     = 512
 }
 
-variable "container_environment" {
+variable "task_container_environment" {
   description = "ENV vars to inject into container environment"
   type    = string
   default = ""
 }
 
-variable "container_image" {
+variable "task_container_image" {
   type    = string
   default = "nginx"
 }
 
-variable "container_port" {
+variable "task_container_port" {
   description = "Port to expose for container"
   type    = number
   default = 80
 }
 
 ##
-##  Service
+##  Load balancer
 ##
-
-variable "desired_count" {
+variable "lb_min_capacity" {
   description = "Number of containers to run. Also used for autoscaling min capacity"
   type        = number
   default     = 2
 }
 
-##
-##  Load balancer
-##
-
-variable "max_capacity" {
+variable "lb_max_capacity" {
   description = "Max size to autoscale to"
   type        = number
   default     = 4
