@@ -22,7 +22,7 @@ resource "aws_security_group" "web_task" {
   tags = {
     Name              = "${var.gen_environment}-${var.task_name}-task"
     Environment       = var.gen_environment
-    TerraformManaged  = ""
+    TerraformManaged  = "true"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_security_group" "web_lb" {
   tags = {
     Name              = "${var.gen_environment}-${var.task_name}-lb"
     Environment       = var.gen_environment
-    TerraformManaged  = ""
+    TerraformManaged  = "true"
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_ecs_cluster" "main" {
   tags = {
     Name              = "${var.gen_environment}-${var.cluster_name}"
     Environment       = var.gen_environment
-    TerraformManaged  = ""
+    TerraformManaged  = "true"
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_cloudwatch_log_group" "task_logs" {
   tags = {
     Name              = "${var.gen_environment}/services/"
     Environment       = var.gen_environment
-    TerraformManaged  = ""
+    TerraformManaged  = "true"
   }
 }
 
@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "main" {
   container_definitions = jsonencode([
     {
       name            = "${var.gen_environment}-${var.task_name}-task"
-      image           = "${var.task_container_image}:latest"
+      image           = "${var.task_container_image}:${var.task_container_image_tag}"
       essential       = true
       #environment     = var.task_container_environment
       portMappings    = [{
@@ -120,11 +120,21 @@ resource "aws_ecs_task_definition" "main" {
       }
     }
   ])
+  tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-task"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
+  }
 }
 
 // Task role for the executing app to do things
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.task_name}-ecsTaskRole"
+  name = "${var.gen_environment}-${var.task_name}-taskRole"
+  tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-taskRole"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
+  }
  
   assume_role_policy = <<EOF
 {
@@ -146,6 +156,12 @@ EOF
 // Task execution role to allow fargate to pull and start images
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.gen_environment}-${var.task_name}-taskExecutionRole"
+
+  tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-taskExecutionRole"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
+  }
  
   assume_role_policy = <<EOF
 {
@@ -192,6 +208,12 @@ resource "aws_ecs_service" "main" {
     container_port   = var.task_container_port
   }
 
+    tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-service"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
+  }
+
   // Use this to ignore task definition changes
   // EG if the task is being deployed by the app code repo
   # lifecycle {
@@ -210,6 +232,12 @@ resource "aws_lb" "main" {
   subnets            = var.net_load_balancer_subnet_ids
  
   enable_deletion_protection = false
+
+  tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-alb"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
+  }
 }
  
 resource "aws_alb_target_group" "main" {
@@ -227,6 +255,12 @@ resource "aws_alb_target_group" "main" {
    timeout             = "3"
    path                = "/"
    unhealthy_threshold = "2"
+  }
+
+  tags = {
+    Name              = "${var.gen_environment}-${var.task_name}-tg"
+    Environment       = var.gen_environment
+    TerraformManaged  = "true"
   }
 }
 
