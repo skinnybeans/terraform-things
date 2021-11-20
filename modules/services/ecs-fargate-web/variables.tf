@@ -4,7 +4,6 @@
 variable "gen_region" {
   description = "AWS region to use"
   type        = string
-  default     = "ap-southeast-2"
 }
 
 variable "gen_environment" {
@@ -52,7 +51,6 @@ variable "cluster_name" {
 variable "task_name" {
   description = "name of task to run in ECS"
   type        = string
-  default     = "testtask"
 }
 
 variable "task_cpu" {
@@ -70,12 +68,15 @@ variable "task_memory" {
 variable "task_container_environment" {
   description = "ENV vars to inject into container environment"
   type    = string
-  default = ""
 }
 
 variable "task_container_image" {
   type    = string
-  default = "nginx"
+}
+
+variable "task_container_image_tag" {
+  type    = string
+  default = "latest"
 }
 
 variable "task_container_port" {

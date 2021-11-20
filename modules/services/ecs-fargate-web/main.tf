@@ -104,7 +104,7 @@ resource "aws_ecs_task_definition" "main" {
       name            = "${var.gen_environment}-${var.task_name}-task"
       image           = "${var.task_container_image}:latest"
       essential       = true
-      environment     = var.task_container_environment
+      #environment     = var.task_container_environment
       portMappings    = [{
         protocol      = "tcp"
         containerPort = var.task_container_port
@@ -189,7 +189,7 @@ resource "aws_ecs_service" "main" {
   load_balancer {
     target_group_arn = aws_alb_target_group.main.arn
     container_name   = "${var.gen_environment}-${var.task_name}-task"
-    container_port   = var.container_port
+    container_port   = var.task_container_port
   }
 
   // Use this to ignore task definition changes
@@ -216,7 +216,7 @@ resource "aws_alb_target_group" "main" {
   name        = "${var.gen_environment}-${var.task_name}-tg"
   port        = var.task_container_port
   protocol    = "HTTP"
-  vpc_id      = var.gen_vpc_id
+  vpc_id      = var.net_vpc_id
   target_type = "ip"
  
   health_check {
