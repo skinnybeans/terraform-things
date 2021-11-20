@@ -30,6 +30,13 @@ data "terraform_remote_state" "cert_arn" {
   }
 }
 
+data "aws_route53_zone" "sorcererdecks" {
+  name     = "sorcererdecks.com"
+}
+
+##
+##  NGINX container on ECS cluster
+##
 module "nginx_ecs" {
   source = "../../../modules/services/ecs-fargate-web"
 
@@ -63,4 +70,18 @@ module "nginx_ecs" {
   ##  Load balancer
   lb_min_capacity = 2
   lb_max_capacity = 4
+}
+
+##
+##  Route53 entry for the NGINX fronting LB
+##
+resource "aws_route53_record" "nginx_url" {
+  zone_id = data.aws_route53_zone.sorcererdecks.zone_id
+  name    = "nginx.${data.aws_route53_zone.sorcererdecks.name}"
+  type    = "A"
+  alias {
+    name      = module.nginx_ecs.lb_dns_name
+    zone_id   = module.nginx_ecs.lb_dns_zone_id
+    evaluate_target_health = true
+  }
 }
