@@ -1,3 +1,8 @@
+locals {
+  # Combine internal defined security group with any additional IDs passed into the module
+  service_security_group_ids = length(var.service_addition_sg_ids) > 0 ? concat(var.service_addition_sg_ids, [aws_security_group.web_task.id]) : [aws_security_group.web_task.id]
+}
+
 ##
 ## Security groups
 ##
@@ -104,6 +109,7 @@ resource "aws_ecs_task_definition" "main" {
       name            = "${var.gen_environment}-${var.task_name}-container"
       image           = "${var.task_container_image}:${var.task_container_image_tag}"
       essential       = true
+      # TODO: get container environemnt variables working
       #environment     = var.task_container_environment
       portMappings    = [{
         protocol      = "tcp"
@@ -197,7 +203,7 @@ resource "aws_ecs_service" "main" {
   scheduling_strategy                = "REPLICA"
 
   network_configuration {
-    security_groups  = [aws_security_group.web_task.id]
+    security_groups  = local.service_security_group_ids
     subnets          = var.net_task_subnet_ids
     assign_public_ip = true
   }

@@ -57,6 +57,9 @@ module "nginx_ecs" {
   task_container_image_tag      = "latest"
   task_container_port = 80
 
+  ##  Service
+  service_addition_sg_ids       = []
+
   ##  Load balancer
   lb_min_capacity = 2
   lb_max_capacity = 4

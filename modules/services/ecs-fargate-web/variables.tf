@@ -86,6 +86,15 @@ variable "task_container_port" {
 }
 
 ##
+##  Service
+##
+variable "service_addition_sg_ids" {
+  description = "Additional security group IDs to associate with the service"
+  type        = list
+  default     = []
+}
+
+##
 ##  Load balancer
 ##
 variable "lb_min_capacity" {
