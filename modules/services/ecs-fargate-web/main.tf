@@ -65,19 +65,6 @@ resource "aws_security_group" "web_lb" {
 }
 
 ##
-## Cluster
-##
-resource "aws_ecs_cluster" "main" {
-  name                = "${var.gen_environment}-${var.cluster_name}"
-
-  tags = {
-    Name              = "${var.gen_environment}-${var.cluster_name}"
-    Environment       = var.gen_environment
-    TerraformManaged  = "true"
-  }
-}
-
-##
 ## Cloudwatch log group for task
 ##
 resource "aws_cloudwatch_log_group" "task_logs" {
@@ -194,7 +181,7 @@ resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attach
 // Service to run the task
 resource "aws_ecs_service" "main" {
   name                               = "${var.gen_environment}-${var.task_name}-service"
-  cluster                            = aws_ecs_cluster.main.id
+  cluster                            = var.cluster_id
   task_definition                    = aws_ecs_task_definition.main.arn
   desired_count                      = var.lb_min_capacity
   deployment_minimum_healthy_percent = 50
@@ -312,7 +299,7 @@ resource "aws_alb_listener" "https" {
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = var.lb_max_capacity
   min_capacity       = var.lb_min_capacity
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
+  resource_id        = "service/${var.cluster_name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }

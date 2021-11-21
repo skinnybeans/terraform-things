@@ -35,6 +35,20 @@ data "aws_route53_zone" "sorcererdecks" {
 }
 
 ##
+## Cluster to run task on
+##
+
+resource "aws_ecs_cluster" "main" {
+  name                = "staging-fargate-cluster"
+
+  tags = {
+    Name              = "staging-fargate-cluster"
+    Environment       = "staging"
+    TerraformManaged  = "true"
+  }
+}
+
+##
 ##  NGINX container on ECS cluster
 ##
 module "nginx_ecs" {
@@ -53,7 +67,8 @@ module "nginx_ecs" {
   ssl_load_balancer_certificate_arn = data.terraform_remote_state.cert_arn.outputs.sorcerer_cert_arn
 
   ##  ECS cluster
-  cluster_name        = "test-cluster"
+  cluster_name        = aws_ecs_cluster.main.name
+  cluster_id          = aws_ecs_cluster.main.id
 
   ##  Task
   task_name           = "test-nginx"

@@ -41,7 +41,12 @@ variable "ssl_load_balancer_certificate_arn" {
 ##  ECS cluster
 ##
 variable "cluster_name" {
-  description = "Name for ECS cluster"
+  description = "Name of existing ECS cluster to run task on"
+  type        = string
+}
+
+variable "cluster_id" {
+  description = "Id of existing ECS cluster to run task on"
   type        = string
 }
 
